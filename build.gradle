@@ -47,6 +47,7 @@ ospackage {
 
 buildRpm {
   requires("nginx")
+  postInstall file("scripts/postInstall.sh")
 }
 
 
