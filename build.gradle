@@ -1,0 +1,52 @@
+buildscript {
+  repositories {
+    jcenter()
+    maven { url "https://plugins.gradle.org/m2/" }
+  }
+  dependencies {
+    classpath 'gradle.plugin.com.netflix.nebula:gradle-ospackage-plugin:3.6.1'
+    classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.13"
+  }
+}
+
+apply plugin: 'nebula.ospackage'
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'maven-publish'
+
+artifactory {
+  contextUrl = System.getenv("CONTEXT_URL")
+  publish {
+    repository {
+      repoKey = System.getenv("REPO_KEY")
+      username = System.getenv("USERNAME")
+      password = System.getenv("PASSWORD")
+    }
+    defaults {
+      publications('rpm')
+      publishArtifacts = true
+    }
+  }
+}
+
+publishing {
+  publications {
+    rpm(MavenPublication) {
+      artifact this.project.buildRpm.outputs.files.singleFile
+    }
+  }
+}
+
+ospackage {
+  packageName = "dantest"
+  release '3'
+  os = LINUX
+  from("osfiles") {
+    into "/"
+  }
+}
+
+buildRpm {
+  requires("nginx")
+}
+
+
